@@ -1,3 +1,4 @@
+use crate::game::SPRITE_SCALE;
 use crate::graphics::Sprite;
 use sdl2::image::LoadTexture;
 use sdl2::rect::Rect;
@@ -31,14 +32,14 @@ impl<'a> Graphics<'a> {
         self.sprite_sheets.get(&image_name).unwrap()
     }
 
-    pub fn render_sprite(&mut self, canvas: &mut WindowCanvas, sprite: &Sprite, x: i32, y: i32) {
+    pub fn render_sprite(&self, canvas: &mut WindowCanvas, sprite: &Sprite, x: i32, y: i32) {
         if let Some(texture) = self.sprite_sheets.get(&sprite.name) {
             let src = sprite.source_rect;
             let dest = Rect::new(
                 x,
                 y,
-                sprite.source_rect.width(),
-                sprite.source_rect.height(),
+                (sprite.source_rect.width() as f32 * SPRITE_SCALE) as u32,
+                (sprite.source_rect.height() as f32 * SPRITE_SCALE) as u32,
             );
 
             canvas

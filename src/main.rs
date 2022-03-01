@@ -1,4 +1,6 @@
-use cavestory::{game::Game, graphics::Graphics, input::Input};
+use cavestory::game::*;
+use cavestory::{game::Game, input::Input};
+
 use sdl2::{event::Event, image::InitFlag, keyboard::Scancode, EventPump, Sdl, VideoSubsystem};
 
 fn main() {
@@ -6,10 +8,10 @@ fn main() {
     let video: VideoSubsystem = context.video().unwrap();
     let mut event_pump: EventPump = context.event_pump().unwrap();
     let mut input: Input = Input::default();
-    let mut timer = context.timer().unwrap();
+    let timer = context.timer().unwrap();
 
     let window: sdl2::video::Window = video
-        .window("isometric", 800, 600)
+        .window("Cave Story", SCREEN_WIDTH, SCREEN_HEIGHT)
         .position_centered()
         .resizable()
         .build()
@@ -26,6 +28,7 @@ fn main() {
     let mut dt: u32;
 
     let mut game = Game::new();
+
     game.init_sprite(&mut texture_creator);
 
     'running: loop {
@@ -52,6 +55,7 @@ fn main() {
 
         canvas.clear();
 
+        game.update(dt.min(MAX_FRAME_TIME));
         game.render(&mut canvas);
 
         canvas.present();
