@@ -37,11 +37,11 @@ fn main() {
         for event in event_pump.poll_iter() {
             match event {
                 Event::Quit { .. } => break 'running,
-                Event::KeyDown { repeat, .. } if !repeat => {
-                    input.key_down_event(&event);
+                Event::KeyDown { repeat, scancode, .. } if !repeat => {
+                    input.key_down_event(&scancode);
                 }
-                Event::KeyUp { .. } => {
-                    input.key_up_event(&event);
+                Event::KeyUp { scancode, .. } => {
+                    input.key_up_event(&scancode);
                 }
                 _ => {}
             }

@@ -17,22 +17,16 @@ impl Input {
         self.release_keys.clear();
     }
 
-    pub fn key_up_event(&mut self, event: &Event) {
-        if let Event::KeyUp {
-            scancode: Some(s), ..
-        } = event
-        {
+    pub fn key_up_event(&mut self, scancode: &Option<Scancode>) {
+        if let Some(s) = scancode {
             self.release_keys.insert(*s, true);
             self.held_keys.insert(*s, false);
         }
     }
 
     /// this gets called when a key has been pressed
-    pub fn key_down_event(&mut self, event: &Event) {
-        if let Event::KeyDown {
-            scancode: Some(s), ..
-        } = event
-        {
+    pub fn key_down_event(&mut self, scancode: &Option<Scancode>) {
+        if let Some(s) = scancode {
             self.pressed_keys.insert(*s, true);
             self.held_keys.insert(*s, true);
         }
