@@ -7,6 +7,7 @@ use sdl2::{
 
 use crate::graphics::{Graphics, Sprite};
 
+#[derive(Default)]
 pub struct Game<'a> {
     pub player: Option<Sprite>,
     pub graphics: Graphics<'a>,
@@ -14,10 +15,7 @@ pub struct Game<'a> {
 
 impl<'a> Game<'a> {
     pub fn new() -> Game<'a> {
-        Game {
-            player: None,
-            graphics: Graphics::new(),
-        }
+        Game { player: None, graphics: Graphics::new() }
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a mut TextureCreator<WindowContext>) {
@@ -31,7 +29,7 @@ impl<'a> Game<'a> {
 
     pub fn render(&self, canvas: &mut WindowCanvas) {
         let player = self.player.as_ref().unwrap();
-        self.graphics.render_sprite(canvas, player, 0, 0);
+        self.graphics.render_sprite(canvas, player);
     }
 
     pub fn update(&mut self, _dt: u32) {

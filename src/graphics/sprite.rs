@@ -23,12 +23,7 @@ impl Sprite {
         pos_y: i32,
     ) -> Sprite {
         let source_rect = Rect::new(src_x, src_y, width, height);
-        Sprite {
-            name,
-            source_rect,
-            x: pos_x,
-            y: pos_y,
-        }
+        Sprite { name, source_rect, x: pos_x, y: pos_y }
     }
 
     pub fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {
@@ -39,14 +34,8 @@ impl Sprite {
             (self.source_rect.height() as f32 * SPRITE_SCALE) as u32,
         );
 
-        canvas.copy_ex(
-            texture,
-            Some(self.source_rect),
-            Some(dest),
-            0.0,
-            None,
-            false,
-            false,
-        );
+        canvas
+            .copy_ex(texture, Some(self.source_rect), Some(dest), 0.0, None, false, false)
+            .unwrap();
     }
 }

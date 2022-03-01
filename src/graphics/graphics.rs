@@ -1,22 +1,19 @@
-use crate::game::SPRITE_SCALE;
 use crate::graphics::Sprite;
 use sdl2::image::LoadTexture;
-use sdl2::rect::Rect;
 use sdl2::render::WindowCanvas;
 use sdl2::render::{Texture, TextureCreator};
 use sdl2::video::WindowContext;
 use std::collections::HashMap;
 use std::path::Path;
 
+#[derive(Default)]
 pub struct Graphics<'a> {
     pub sprite_sheets: HashMap<String, Texture<'a>>,
 }
 
 impl<'a> Graphics<'a> {
     pub fn new() -> Graphics<'a> {
-        Graphics {
-            sprite_sheets: HashMap::new(),
-        }
+        Graphics { sprite_sheets: HashMap::new() }
     }
 
     pub fn load_image(
@@ -32,19 +29,9 @@ impl<'a> Graphics<'a> {
         self.sprite_sheets.get(&image_name).unwrap()
     }
 
-    pub fn render_sprite(&self, canvas: &mut WindowCanvas, sprite: &Sprite, x: i32, y: i32) {
+    pub fn render_sprite(&self, canvas: &mut WindowCanvas, sprite: &Sprite) {
         if let Some(texture) = self.sprite_sheets.get(&sprite.name) {
-            let src = sprite.source_rect;
-            let dest = Rect::new(
-                x,
-                y,
-                (sprite.source_rect.width() as f32 * SPRITE_SCALE) as u32,
-                (sprite.source_rect.height() as f32 * SPRITE_SCALE) as u32,
-            );
-
-            canvas
-                .copy_ex(texture, Some(src), Some(dest), 0.0, None, false, false)
-                .unwrap();
+            sprite.render(canvas, texture);
         }
     }
 }
