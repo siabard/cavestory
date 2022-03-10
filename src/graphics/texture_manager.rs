@@ -12,9 +12,7 @@ pub struct TextureManager<'a> {
 
 impl<'a> TextureManager<'a> {
     pub fn new() -> TextureManager<'a> {
-        TextureManager {
-            textures: HashMap::new(),
-        }
+        TextureManager { textures: HashMap::new() }
     }
 
     pub fn insert(

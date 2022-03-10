@@ -5,6 +5,8 @@ use sdl2::{
 
 use crate::game::SPRITE_SCALE;
 
+use super::Renderable;
+
 pub struct Sprite {
     pub name: String,
     pub source_rect: Rect,
@@ -25,8 +27,14 @@ impl Sprite {
         let source_rect = Rect::new(src_x, src_y, width, height);
         Sprite { name, source_rect, x: pos_x, y: pos_y }
     }
+}
 
-    pub fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {
+impl Renderable for Sprite {
+    fn get_name(&self) -> String {
+        self.name.clone()
+    }
+
+    fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {
         let dest = Rect::new(
             self.x,
             self.y,
