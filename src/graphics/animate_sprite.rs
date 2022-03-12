@@ -25,7 +25,6 @@ impl Animation {
             }
         }
 
-        dbg!(&frames);
         Self { frames }
     }
 }
@@ -39,8 +38,6 @@ pub struct AnimateSprite {
     pub time_elapsed: u32,
     pub frame_length: u32,
     pub visible: bool,
-    x: i32,
-    y: i32,
 }
 
 impl AnimateSprite {
@@ -53,8 +50,6 @@ impl AnimateSprite {
             time_elapsed,
             frame_length,
             visible: false,
-            x: 0,
-            y: 0,
         }
     }
 
@@ -64,7 +59,11 @@ impl AnimateSprite {
     }
 
     pub fn set_animation(&mut self, name: String) {
-        self.current_animation = name;
+        if self.current_animation.ne(&name) {
+            self.current_animation = name;
+            self.frame_index = 0;
+            self.time_elapsed = 0;
+        }
     }
 
     pub fn update(&mut self, dt: u32) {
@@ -75,25 +74,25 @@ impl AnimateSprite {
             self.time_elapsed = 0;
 
             self.frame_index += 1;
-            if self.frame_index >= current_animation.frames.len() {
-                self.frame_index = 0;
-            }
+        }
+
+        if self.frame_index >= current_animation.frames.len() {
+            self.frame_index = 0;
         }
     }
-}
 
-impl Renderable for AnimateSprite {
-    fn get_name(&self) -> String {
+    pub fn get_name(&self) -> String {
         self.name.clone()
     }
 
-    fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {
+    pub fn render(&self, x: i32, y: i32, canvas: &mut WindowCanvas, texture: &Texture) {
         let current_animation = self.sprites.get(&(self.current_animation)).unwrap();
+
         let current_sprite = current_animation.frames[self.frame_index];
 
         let dest = Rect::new(
-            self.x,
-            self.y,
+            x,
+            y,
             (current_sprite.width() as f32 * SPRITE_SCALE) as u32,
             (current_sprite.height() as f32 * SPRITE_SCALE) as u32,
         );

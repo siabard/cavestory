@@ -10,34 +10,22 @@ use super::Renderable;
 pub struct Sprite {
     pub name: String,
     pub source_rect: Rect,
-    x: i32,
-    y: i32,
 }
 
 impl Sprite {
-    pub fn new(
-        name: String,
-        src_x: i32,
-        src_y: i32,
-        width: u32,
-        height: u32,
-        pos_x: i32,
-        pos_y: i32,
-    ) -> Sprite {
+    pub fn new(name: String, src_x: i32, src_y: i32, width: u32, height: u32) -> Sprite {
         let source_rect = Rect::new(src_x, src_y, width, height);
-        Sprite { name, source_rect, x: pos_x, y: pos_y }
+        Sprite { name, source_rect }
     }
-}
 
-impl Renderable for Sprite {
-    fn get_name(&self) -> String {
+    pub fn get_name(&self) -> String {
         self.name.clone()
     }
 
-    fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {
+    pub fn render(&self, x: i32, y: i32, canvas: &mut WindowCanvas, texture: &Texture) {
         let dest = Rect::new(
-            self.x,
-            self.y,
+            x,
+            y,
             (self.source_rect.width() as f32 * SPRITE_SCALE) as u32,
             (self.source_rect.height() as f32 * SPRITE_SCALE) as u32,
         );

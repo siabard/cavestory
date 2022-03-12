@@ -1,16 +1,15 @@
 use std::path::Path;
 
 use sdl2::{
-    rect::Rect,
     render::{TextureCreator, WindowCanvas},
     video::WindowContext,
 };
 
-use crate::graphics::{AnimateSprite, Graphics};
+use crate::{graphics::Graphics, input::Input, player::Player};
 
 #[derive(Default)]
 pub struct Game<'a> {
-    pub player: Option<AnimateSprite>,
+    pub player: Option<Player>,
     pub graphics: Graphics<'a>,
 }
 
@@ -20,9 +19,7 @@ impl<'a> Game<'a> {
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a mut TextureCreator<WindowContext>) {
-        let mut player = AnimateSprite::new("player".into(), 0, 0, 150);
-        player.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 3, 2);
-        player.set_animation("move_left".into());
+        let player = Player::new(100, 100);
         self.player = Some(player);
         self.graphics.load_image(
             texture_creator,
@@ -38,5 +35,16 @@ impl<'a> Game<'a> {
 
     pub fn update(&mut self, dt: u32) {
         self.player.as_mut().unwrap().update(dt);
+    }
+
+    pub fn process_key_event(&mut self, input: &Input) {
+        let player = self.player.as_mut().unwrap();
+        if input.is_key_held(sdl2::keyboard::Scancode::Left) {
+            player.move_left();
+        } else if input.is_key_held(sdl2::keyboard::Scancode::Right) {
+            player.move_right();
+        } else {
+            player.stop();
+        }
     }
 }
