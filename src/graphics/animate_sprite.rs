@@ -1,8 +1,6 @@
-use crate::game::{MAX_FRAME_TIME, SPRITE_SCALE};
+use crate::game::SPRITE_SCALE;
 use sdl2::{rect::Rect, render::Texture, render::WindowCanvas};
 use std::collections::HashMap;
-
-use super::Renderable;
 
 #[derive(Default)]
 pub struct Animation {

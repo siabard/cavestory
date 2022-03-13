@@ -7,6 +7,14 @@ use sdl2::{
 
 use crate::{graphics::Graphics, input::Input, player::Player};
 
+fn bool_to_sign(b: bool) -> i32 {
+    if b {
+        1
+    } else {
+        0
+    }
+}
+
 #[derive(Default)]
 pub struct Game<'a> {
     pub player: Option<Player>,
@@ -39,12 +47,12 @@ impl<'a> Game<'a> {
 
     pub fn process_key_event(&mut self, input: &Input) {
         let player = self.player.as_mut().unwrap();
-        if input.is_key_held(sdl2::keyboard::Scancode::Left) {
-            player.move_left();
-        } else if input.is_key_held(sdl2::keyboard::Scancode::Right) {
-            player.move_right();
-        } else {
-            player.stop();
-        }
+
+        player.move_vector((
+            bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Right))
+                - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Left)),
+            bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Down))
+                - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Up)),
+        ));
     }
 }

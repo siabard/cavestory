@@ -1,4 +1,3 @@
-use crate::graphics::Sprite;
 use sdl2::image::LoadTexture;
 use sdl2::render::WindowCanvas;
 use sdl2::render::{Texture, TextureCreator};
