@@ -18,7 +18,7 @@ fn main() {
         .unwrap();
 
     let mut canvas = window.into_canvas().build().unwrap();
-    let mut texture_creator = canvas.texture_creator();
+    let texture_creator = canvas.texture_creator();
 
     // add PNG / JPEG support
     let _image_context = sdl2::image::init(InitFlag::PNG | InitFlag::JPG);
@@ -29,7 +29,7 @@ fn main() {
 
     let mut game = Game::new();
 
-    game.init_sprite(&mut texture_creator);
+    game.init_sprite(&texture_creator);
 
     'running: loop {
         input.begin_new_frame();
@@ -66,6 +66,6 @@ fn main() {
         last_update_time = current_time;
 
         // some delays
-        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 120));
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
