@@ -1,7 +1,9 @@
 pub mod animate_sprite;
 pub mod graphics;
+pub mod map;
 pub mod sprite;
 pub mod texture_manager;
+pub mod tile;
 
 pub use animate_sprite::*;
 pub use graphics::*;
