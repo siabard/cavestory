@@ -1,7 +1,7 @@
 use cavestory::game::*;
 use cavestory::{game::Game, input::Input};
-
 use sdl2::{event::Event, image::InitFlag, keyboard::Scancode, EventPump, Sdl, VideoSubsystem};
+use std::time::Duration;
 
 fn main() {
     let context: Sdl = sdl2::init().unwrap();
@@ -56,10 +56,16 @@ fn main() {
         canvas.clear();
 
         game.update(dt.min(MAX_FRAME_TIME));
+
+        game.process_key_event(&input);
+
         game.render(&mut canvas);
 
         canvas.present();
 
         last_update_time = current_time;
+
+        // some delays
+        ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
