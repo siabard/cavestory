@@ -18,7 +18,7 @@ impl<'a> Graphics<'a> {
 
     pub fn load_image(
         &mut self,
-        texture_creator: &'a mut TextureCreator<WindowContext>,
+        texture_creator: &'a TextureCreator<WindowContext>,
         image_name: String,
         path: &Path,
     ) -> &Texture<'a> {

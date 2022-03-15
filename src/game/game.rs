@@ -18,7 +18,7 @@ impl<'a> Game<'a> {
         Game { player: None, graphics: Graphics::new() }
     }
 
-    pub fn init_sprite(&mut self, texture_creator: &'a mut TextureCreator<WindowContext>) {
+    pub fn init_sprite(&mut self, texture_creator: &'a TextureCreator<WindowContext>) {
         self.player = Some(Sprite::new("player".into(), 0, 0, 16, 16, 100, 100));
         self.graphics.load_image(
             texture_creator,
