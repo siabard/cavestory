@@ -1,6 +1,6 @@
 pub mod animate_sprite;
 pub mod graphics;
-pub mod map;
+pub mod level;
 pub mod sprite;
 pub mod texture_manager;
 pub mod tile;

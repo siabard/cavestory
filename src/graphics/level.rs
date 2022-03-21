@@ -4,6 +4,7 @@ use sdl2::render::WindowCanvas;
 use std::collections::HashMap;
 
 use crate::constant::*;
+use crate::game::SPRITE_SCALE;
 /// Tiled를 읽어서 맵을 채운다.
 use crate::graphics::tile;
 use sdl2::video::WindowContext;
@@ -15,12 +16,12 @@ use tiled::parse_file;
 pub const MAP_WIDTH: i32 = 20;
 
 /// 맵의 세로 타일 수
-pub const MAP_HEIGHT: i32 = 15;
+pub const MAP_HEIGHT: i32 = 16;
 
 /// 지도용 구조체
 /// 지도에는 map용 파일과
 /// 각 map 블럭에 대한 정보를 넣는다.
-pub struct Map<'a> {
+pub struct Level<'a> {
     map_id: String,
     pub x: i32,     //  x
     pub y: i32,     //  y
@@ -39,12 +40,12 @@ pub struct Map<'a> {
     pub gids: HashMap<u32, usize>,
 }
 
-impl<'a> Map<'a> {
+impl<'a> Level<'a> {
     pub fn new(
-        map_id: String,
+        level_id: String,
         texture_creator: &'a TextureCreator<WindowContext>,
         path: &'static str,
-    ) -> Map<'a> {
+    ) -> Level<'a> {
         // read tmx file
         let map: tiled::Map = parse_file(Path::new(&(ASSET_DIR.to_owned() + path))).unwrap();
 
@@ -104,8 +105,8 @@ impl<'a> Map<'a> {
             }
         }
 
-        Map {
-            map_id,
+        Level {
+            map_id: level_id,
             x: 0,
             y: 0,
             cam_x: 0,
@@ -188,18 +189,22 @@ impl<'a> Map<'a> {
                                 let rect =
                                     self.tile_atlases.get(idx_gid).unwrap().get_tile_rect(gid);
 
+                                let dest = Rect::new(
+                                    (((x - tile_left) as i32 * tile_width as i32 - tile_start_x)
+                                        as f32
+                                        * SPRITE_SCALE) as i32,
+                                    (((y - tile_top) as i32 * tile_height as i32 - tile_start_y)
+                                        as f32
+                                        * SPRITE_SCALE) as i32,
+                                    (tile_width as f32 * SPRITE_SCALE) as u32,
+                                    (tile_height as f32 * SPRITE_SCALE) as u32,
+                                );
+
                                 canvas
                                     .copy_ex(
                                         &self.textures[idx_gid],
                                         Some(rect),
-                                        Some(Rect::new(
-                                            (x - tile_left) as i32 * tile_width as i32
-                                                - tile_start_x,
-                                            (y - tile_top) as i32 * tile_height as i32
-                                                - tile_start_y,
-                                            tile_width,
-                                            tile_height,
-                                        )),
+                                        Some(dest),
                                         0.0,
                                         None,
                                         false,
