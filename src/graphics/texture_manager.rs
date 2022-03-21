@@ -6,6 +6,7 @@ use sdl2::{
     video::WindowContext,
 };
 
+#[derive(Default)]
 pub struct TextureManager<'a> {
     pub textures: HashMap<&'static str, Texture<'a>>,
 }
