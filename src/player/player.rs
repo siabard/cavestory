@@ -15,13 +15,18 @@ pub enum Direction {
     IdleRight,
 }
 
+pub const GRAVITY: f32 = 0.02;
+pub const GRAVITY_CAP: f32 = 0.8;
+pub const WALK_SPEED: f32 = 0.2;
+
 pub struct Player {
     animation: AnimateSprite,
     x: i32,
     y: i32,
-    dx: i32,
-    dy: i32,
+    dx: f32,
+    dy: f32,
     facing: Direction,
+    grounded: bool,
 }
 
 impl Player {
@@ -32,18 +37,23 @@ impl Player {
         animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 3, 1);
         animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 3, 1);
         animation.set_animation("move_left".into());
-        Self { animation, x, y, dx: 0, dy: 0, facing: Direction::IdleLeft }
+        Self { animation, x, y, dx: 0.0, dy: 0.0, facing: Direction::IdleLeft, grounded: false }
     }
 
     pub fn update(&mut self, dt: u32) {
         self.animation.update(dt);
-        self.x += ((self.dx * dt as i32) as f64 / 500.) as i32;
-        self.y += ((self.dy * dt as i32) as f64 / 500.) as i32;
+        self.x += (self.dx * dt as f32) as i32;
+
+        // free fall
+        if self.dy <= GRAVITY_CAP {
+            self.dy += GRAVITY;
+        }
+        self.y += (self.dy * dt as f32) as i32;
 
         self.facing = match self.dy {
-            dy if dy > 0 => Direction::Down,
-            dy if dy < 0 => Direction::Up,
-            dy if dy == 0 => {
+            dy if dy > 0. => Direction::Down,
+            dy if dy < 0. => Direction::Up,
+            dy if dy == 0. => {
                 if self.facing == Direction::Down {
                     Direction::IdleRight
                 } else if self.facing == Direction::Up {
@@ -56,9 +66,9 @@ impl Player {
         };
 
         self.facing = match self.dx {
-            dx if dx > 0 => Direction::Right,
-            dx if dx < 0 => Direction::Left,
-            dx if dx == 0 => {
+            dx if dx > 0. => Direction::Right,
+            dx if dx < 0. => Direction::Left,
+            dx if dx == 0. => {
                 if self.facing == Direction::Right {
                     Direction::IdleRight
                 } else if self.facing == Direction::Left {
@@ -81,12 +91,12 @@ impl Player {
     }
 
     pub fn move_vector(&mut self, vector: (i32, i32)) {
-        self.dx = 100 * vector.0;
-        self.dy = 100 * vector.1;
+        self.dx = WALK_SPEED * vector.0 as f32;
+        // self.dy = WALK_SPEED * vector.1 as f32;
     }
     pub fn stop(&mut self) {
-        self.dx = 0;
-        self.dy = 0;
+        self.dx = 0.0;
+        // self.dy = 0.0;
     }
 }
 

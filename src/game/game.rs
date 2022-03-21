@@ -7,10 +7,12 @@ use sdl2::{
 };
 
 use crate::{
-    graphics::{map::Map, Graphics},
+    graphics::{level::Level, Graphics},
     input::Input,
     player::Player,
 };
+
+use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
 
 fn bool_to_sign(b: bool) -> i32 {
     if b {
@@ -23,13 +25,13 @@ fn bool_to_sign(b: bool) -> i32 {
 #[derive(Default)]
 pub struct Game<'a> {
     pub player: Option<Player>,
-    pub map: Option<Map<'a>>,
+    pub level: Option<Level<'a>>,
     pub graphics: Graphics<'a>,
 }
 
 impl<'a> Game<'a> {
     pub fn new() -> Game<'a> {
-        Game { player: None, map: None, graphics: Graphics::new() }
+        Game { player: None, level: None, graphics: Graphics::new() }
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a TextureCreator<WindowContext>) {
@@ -41,13 +43,21 @@ impl<'a> Game<'a> {
             Path::new("resources/mychar.png"),
         );
 
-        let map = Map::new("map".into(), texture_creator, "tiled_base64_zlib.tmx");
-        self.map = Some(map);
+        let map = Level::new("map".into(), texture_creator, "stage.tmx");
+        self.level = Some(map);
     }
 
     pub fn render(&self, canvas: &mut WindowCanvas) {
-        if let Some(map) = &self.map {
-            map.render(canvas, &Rect::new(0, 0, 320, 240));
+        if let Some(map) = &self.level {
+            map.render(
+                canvas,
+                &Rect::new(
+                    0,
+                    0,
+                    (SCREEN_WIDTH as f32 / SPRITE_SCALE) as u32,
+                    (SCREEN_HEIGHT as f32 / SPRITE_SCALE) as u32,
+                ),
+            );
         }
 
         if let Some(player) = &self.player {
