@@ -66,6 +66,9 @@ fn main() {
         last_update_time = current_time;
 
         // some delays
+        // 아래의 시간은 1 nano sec (10억분의 1초) 기준이다.
+        // 즉 16666666.6667 ns = 16666.6666667 micro = 16.6667 ms
+        // 해당 정도의 시간에 대한 딜레이를 준 것
         ::std::thread::sleep(Duration::new(0, 1_000_000_000u32 / 60));
     }
 }
