@@ -55,10 +55,9 @@ fn main() {
 
         canvas.clear();
 
-        game.update(dt.min(MAX_FRAME_TIME));
-
         game.process_key_event(&input);
 
+        game.update(dt.min(MAX_FRAME_TIME));
         game.render(&mut canvas);
 
         canvas.present();

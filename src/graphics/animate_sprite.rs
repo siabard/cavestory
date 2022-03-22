@@ -89,8 +89,8 @@ impl AnimateSprite {
         let current_sprite = current_animation.frames[self.frame_index];
 
         let dest = Rect::new(
-            x,
-            y,
+            (x as f32 * SPRITE_SCALE) as i32,
+            (y as f32 * SPRITE_SCALE) as i32,
             (current_sprite.width() as f32 * SPRITE_SCALE) as u32,
             (current_sprite.height() as f32 * SPRITE_SCALE) as u32,
         );

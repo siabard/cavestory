@@ -7,6 +7,7 @@ use crate::constant::*;
 use crate::game::SPRITE_SCALE;
 /// Tiled를 읽어서 맵을 채운다.
 use crate::graphics::tile;
+use crate::physics::collides_with;
 use sdl2::video::WindowContext;
 use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
@@ -68,11 +69,14 @@ impl<'a> Level<'a> {
                 .load_texture(Path::new(&(ASSET_DIR.to_owned() + &tileset.images[0].source)))
                 .unwrap();
 
+            // tile_atlas는 현재 tileset의 Texture를 tile 한 개의 폭, 높이로 잘라
+            // first_gid 부터 다음 tileset의 first_gid 까지를 전체 크기로 하는 타일 정보를 만든다.
             let tile_atlas =
                 tile::TileAtlas::new(&texture, tileset.first_gid, tile_width, tile_height);
             textures.insert(i, texture);
 
-            //tile atlas에 정의된 모든 tile 정보에 texture id를 넣는다.
+            // tile_atlas를 만들고, gid가 주어졌을 때 어떤 tile_atlas에서 부터 찾아야할지
+            // 참조할 수 있는 역참조 테이블을 만든다.
             for (j, _) in tile_atlas.atlas.iter().enumerate() {
                 gids.insert(j as u32 + tileset.first_gid, i);
             }
@@ -217,5 +221,9 @@ impl<'a> Level<'a> {
                 }
             }
         }
+    }
+
+    pub fn collided_blocks(&self, other: &Rect) -> Vec<Rect> {
+        self.blocks.iter().filter(|block| collides_with(*block, other)).copied().collect()
     }
 }

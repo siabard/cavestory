@@ -68,6 +68,14 @@ impl<'a> Game<'a> {
     pub fn update(&mut self, dt: u32) {
         if let Some(player) = self.player.as_mut() {
             player.update(dt);
+
+            if let Some(level) = &self.level {
+                // collision
+                let collided_blocks = level.collided_blocks(&player.collision);
+                if !collided_blocks.is_empty() {
+                    player.handle_collision(&collided_blocks);
+                }
+            }
         }
     }
 
@@ -77,8 +85,7 @@ impl<'a> Game<'a> {
         player.move_vector((
             bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Right))
                 - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Left)),
-            bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Down))
-                - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Up)),
+            -bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Up)),
         ));
     }
 }

@@ -22,8 +22,8 @@ impl Sprite {
 
     pub fn render(&self, x: i32, y: i32, canvas: &mut WindowCanvas, texture: &Texture) {
         let dest = Rect::new(
-            x,
-            y,
+            (x as f32 * SPRITE_SCALE) as i32,
+            (y as f32 * SPRITE_SCALE) as i32,
             (self.source_rect.width() as f32 * SPRITE_SCALE) as u32,
             (self.source_rect.height() as f32 * SPRITE_SCALE) as u32,
         );

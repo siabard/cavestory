@@ -3,7 +3,10 @@ use sdl2::{
     render::{Texture, WindowCanvas},
 };
 
-use crate::graphics::{AnimateSprite, Renderable};
+use crate::{
+    graphics::{AnimateSprite, Renderable},
+    physics::Sides,
+};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub enum Direction {
@@ -13,6 +16,19 @@ pub enum Direction {
     Right,
     IdleLeft,
     IdleRight,
+    Idle,
+}
+
+impl From<Sides> for Direction {
+    fn from(side: Sides) -> Direction {
+        match side {
+            Sides::Bottom => Direction::Down,
+            Sides::Top => Direction::Up,
+            Sides::Left => Direction::Left,
+            Sides::Right => Direction::Right,
+            Sides::None => Direction::Idle,
+        }
+    }
 }
 
 pub const GRAVITY: f32 = 0.02;
@@ -27,6 +43,7 @@ pub struct Player {
     dy: f32,
     facing: Direction,
     grounded: bool,
+    pub collision: Rect,
 }
 
 impl Player {
@@ -37,7 +54,16 @@ impl Player {
         animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 3, 1);
         animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 3, 1);
         animation.set_animation("move_left".into());
-        Self { animation, x, y, dx: 0.0, dy: 0.0, facing: Direction::IdleLeft, grounded: false }
+        Self {
+            animation,
+            x,
+            y,
+            dx: 0.0,
+            dy: 0.0,
+            facing: Direction::IdleLeft,
+            grounded: false,
+            collision: Rect::new(0, 0, 16, 16),
+        }
     }
 
     pub fn update(&mut self, dt: u32) {
@@ -87,7 +113,11 @@ impl Player {
             Direction::Right => self.animation.set_animation("move_right".into()),
             Direction::Up => self.animation.set_animation("move_left".into()),
             Direction::Down => self.animation.set_animation("move_right".into()),
+            _ => self.animation.set_animation("idle_right".into()),
         }
+
+        self.collision.x = self.x;
+        self.collision.y = self.y;
     }
 
     pub fn move_vector(&mut self, vector: (i32, i32)) {
@@ -97,6 +127,58 @@ impl Player {
     pub fn stop(&mut self) {
         self.dx = 0.0;
         // self.dy = 0.0;
+    }
+
+    pub fn handle_collision(&mut self, others: &[Rect]) {
+        for other in others {
+            let side = self.collision_side(other);
+            match side {
+                Sides::Top => {
+                    self.y = other.y + other.height() as i32;
+                    self.dy = 0.;
+                }
+                Sides::Bottom => {
+                    self.y = other.y - self.collision.height() as i32;
+                    self.dy = 0.;
+                    self.grounded = true;
+                }
+                Sides::Left => {
+                    self.x = other.x + other.width() as i32;
+                    self.dx = 0.;
+                }
+                Sides::Right => {
+                    self.x = other.x - self.collision.width() as i32;
+                    self.dx = 0.;
+                }
+                _ => {}
+            }
+        }
+        self.collision.x = self.x;
+        self.collision.y = self.y;
+    }
+
+    fn collision_side(&self, other: &Rect) -> Sides {
+        let amt_right = self.x + self.collision.width() as i32 - other.x;
+        let amt_left = other.x + other.width() as i32 - self.x;
+        let amt_top = other.y + other.height() as i32 - self.y;
+        let amt_bottom = self.y + self.collision.height() as i32 - other.y;
+
+        let mut vals = vec![amt_right.abs(), amt_left.abs(), amt_top.abs(), amt_bottom.abs()];
+        vals.sort();
+
+        let min_val = vals[0];
+
+        if min_val == amt_right.abs() {
+            Sides::Right
+        } else if min_val == amt_left.abs() {
+            Sides::Left
+        } else if min_val == amt_top.abs() {
+            Sides::Top
+        } else if min_val == amt_bottom.abs() {
+            Sides::Bottom
+        } else {
+            Sides::None
+        }
     }
 }
 
