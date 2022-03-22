@@ -164,7 +164,7 @@ impl Player {
         let amt_bottom = self.y + self.collision.height() as i32 - other.y;
 
         let mut vals = vec![amt_right.abs(), amt_left.abs(), amt_top.abs(), amt_bottom.abs()];
-        vals.sort();
+        vals.sort_unstable();
 
         let min_val = vals[0];
 
