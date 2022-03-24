@@ -13,11 +13,22 @@ use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
 use tiled::parse_file;
 
+use super::Vector2;
+
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
 
 /// 맵의 세로 타일 수
 pub const MAP_HEIGHT: i32 = 16;
+
+/// 기울기용 기조체
+#[derive(Clone, PartialEq, Debug)]
+pub struct Slope {
+    x: f32,
+    y: f32,
+    from: Vector2,
+    to: Vector2,
+}
 
 /// 지도용 구조체
 /// 지도에는 map용 파일과
@@ -38,6 +49,7 @@ pub struct Level<'a> {
     pub layers: Vec<tiled::Layer>,
     pub textures: HashMap<usize, Texture<'a>>,
     pub blocks: Vec<Rect>,
+    pub slopes: Vec<Slope>,
     pub gids: HashMap<u32, usize>,
 }
 
@@ -51,8 +63,10 @@ impl<'a> Level<'a> {
         let map: tiled::Map = parse_file(Path::new(&(ASSET_DIR.to_owned() + path))).unwrap();
 
         let layers: Vec<tiled::Layer> = map.layers;
+        let object_group: Vec<tiled::ObjectGroup> = map.object_groups;
         let tile_sets: Vec<tiled::Tileset> = map.tilesets;
 
+        let mut slopes = vec![];
         let mut textures = HashMap::new();
         let mut tile_atlases = HashMap::new();
         let mut tile_widths = HashMap::new();
@@ -109,6 +123,20 @@ impl<'a> Level<'a> {
             }
         }
 
+        for (_, object_group) in object_group.iter().enumerate() {
+            let objects = &object_group.objects;
+            for object in objects {
+                if let tiled::ObjectShape::Polyline { points } = &object.shape {
+                    slopes.push(Slope {
+                        x: object.x,
+                        y: object.y,
+                        from: points[0].into(),
+                        to: points[1].into(),
+                    })
+                }
+            }
+        }
+
         Level {
             map_id: level_id,
             x: 0,
@@ -126,6 +154,7 @@ impl<'a> Level<'a> {
             textures,
             blocks,
             gids,
+            slopes,
         }
     }
 
