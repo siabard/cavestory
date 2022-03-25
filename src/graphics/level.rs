@@ -13,7 +13,7 @@ use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
 use tiled::parse_file;
 
-use super::Vector2;
+use super::{Rectangle, Vector2};
 
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
@@ -22,12 +22,35 @@ pub const MAP_WIDTH: i32 = 20;
 pub const MAP_HEIGHT: i32 = 16;
 
 /// 기울기용 기조체
-#[derive(Clone, PartialEq, Debug)]
+#[derive(Clone, Copy, PartialEq, Debug)]
 pub struct Slope {
-    x: f32,
-    y: f32,
-    from: Vector2,
-    to: Vector2,
+    pub from: Vector2,
+    pub to: Vector2,
+}
+
+impl Slope {
+    pub fn get_slope(&self) -> f32 {
+        (self.to.1.abs() - self.from.1.abs()) / (self.to.0.abs() - self.from.0.abs())
+    }
+
+    pub fn collides_with(&self, rect: Rectangle) -> bool {
+        rect.right > self.to.left()
+            && rect.left < self.from.left()
+            && rect.top < self.to.top()
+            && rect.bottom > self.from.top()
+            || rect.right > self.from.left()
+                && rect.left < self.to.left()
+                && rect.top < self.from.top()
+                && rect.bottom > self.to.top()
+            || rect.left < self.from.left()
+                && rect.right > self.to.left()
+                && rect.top < self.from.top()
+                && rect.bottom > self.to.top()
+            || rect.left < self.to.left()
+                && rect.right > self.from.left()
+                && rect.top < self.to.top()
+                && rect.bottom > self.from.top()
+    }
 }
 
 /// 지도용 구조체
@@ -127,12 +150,12 @@ impl<'a> Level<'a> {
             let objects = &object_group.objects;
             for object in objects {
                 if let tiled::ObjectShape::Polyline { points } = &object.shape {
-                    slopes.push(Slope {
-                        x: object.x,
-                        y: object.y,
-                        from: points[0].into(),
-                        to: points[1].into(),
-                    })
+                    let mut from = Vector2(object.x + points[0].0, object.y + points[0].1);
+                    for i in 1..points.len() {
+                        let to = Vector2(object.x + points[i].0, object.y + points[i].1);
+                        slopes.push(Slope { from, to });
+                        from = to;
+                    }
                 }
             }
         }
@@ -254,5 +277,13 @@ impl<'a> Level<'a> {
 
     pub fn collided_blocks(&self, other: &Rect) -> Vec<Rect> {
         self.blocks.iter().filter(|block| collides_with(*block, other)).copied().collect()
+    }
+
+    pub fn collided_slopes(&self, other: &Rect) -> Vec<Slope> {
+        self.slopes
+            .iter()
+            .filter(|slope| (*slope).collides_with((*other).into()))
+            .copied()
+            .collect()
     }
 }
