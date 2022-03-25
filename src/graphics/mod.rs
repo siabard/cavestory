@@ -39,6 +39,8 @@ pub struct Rectangle {
     pub right: f32,
     pub top: f32,
     pub bottom: f32,
+    pub height: f32,
+    pub width: f32,
 }
 
 impl From<Rect> for Rectangle {
@@ -48,7 +50,19 @@ impl From<Rect> for Rectangle {
             right: (rect.x + rect.w) as f32,
             top: rect.y as f32,
             bottom: (rect.y + rect.h) as f32,
+            width: rect.w as f32,
+            height: rect.h as f32,
         }
+    }
+}
+
+impl Rectangle {
+    pub fn center_x(&self) -> f32 {
+        (self.left + self.right) / 2.
+    }
+
+    pub fn center_y(&self) -> f32 {
+        (self.top + self.bottom) / 2.
     }
 }
 

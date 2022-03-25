@@ -4,7 +4,7 @@ use sdl2::{
 };
 
 use crate::{
-    graphics::{AnimateSprite, Renderable},
+    graphics::{level::Slope, AnimateSprite, Rectangle, Renderable},
     physics::Sides,
 };
 
@@ -34,6 +34,7 @@ impl From<Sides> for Direction {
 pub const GRAVITY: f32 = 0.02;
 pub const GRAVITY_CAP: f32 = 0.8;
 pub const WALK_SPEED: f32 = 0.2;
+pub const JUMP_SPPED: f32 = 0.4;
 
 pub struct Player {
     animation: AnimateSprite,
@@ -63,6 +64,18 @@ impl Player {
             facing: Direction::IdleLeft,
             grounded: false,
             collision: Rect::new(0, 0, 16, 16),
+        }
+    }
+
+    pub fn stop_moving(&mut self) {
+        self.dx = 0.;
+        self.dy = 0.;
+    }
+
+    pub fn jump(&mut self) {
+        if self.grounded {
+            self.dy = -JUMP_SPPED;
+            self.grounded = false;
         }
     }
 
@@ -129,13 +142,21 @@ impl Player {
         // self.dy = 0.0;
     }
 
-    pub fn handle_collision(&mut self, others: &[Rect]) {
+    pub fn handle_tile_collision(&mut self, others: &[Rect]) {
         for other in others {
             let side = self.collision_side(other);
             match side {
                 Sides::Top => {
-                    self.y = other.y + other.height() as i32;
                     self.dy = 0.;
+                    self.y = other.y + other.height() as i32;
+                    if self.grounded {
+                        self.dx = 0.;
+                        self.x = ((self.x as f32)
+                            - match self.facing {
+                                Direction::Right => 0.5,
+                                _ => -0.5,
+                            }) as i32;
+                    }
                 }
                 Sides::Bottom => {
                     self.y = other.y - self.collision.height() as i32;
@@ -155,6 +176,19 @@ impl Player {
         }
         self.collision.x = self.x;
         self.collision.y = self.y;
+    }
+
+    pub fn handle_slope_collision(&mut self, slopes: &[Slope]) {
+        for slope in slopes {
+            let b = slope.from.top() - slope.get_slope() * slope.from.left().abs();
+            let bounce_rect: Rectangle = self.collision.into();
+            let center_x = bounce_rect.center_x();
+
+            let new_y = slope.get_slope() * center_x + b - 4.0;
+            if self.grounded {
+                self.y = (new_y - bounce_rect.height) as i32;
+            }
+        }
     }
 
     fn collision_side(&self, other: &Rect) -> Sides {

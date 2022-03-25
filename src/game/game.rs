@@ -73,7 +73,13 @@ impl<'a> Game<'a> {
                 // collision
                 let collided_blocks = level.collided_blocks(&player.collision);
                 if !collided_blocks.is_empty() {
-                    player.handle_collision(&collided_blocks);
+                    player.handle_tile_collision(&collided_blocks);
+                }
+
+                // collision slope
+                let collided_slopes = level.collided_slopes(&player.collision);
+                if !collided_slopes.is_empty() {
+                    player.handle_slope_collision(&collided_slopes);
                 }
             }
         }
@@ -85,7 +91,11 @@ impl<'a> Game<'a> {
         player.move_vector((
             bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Right))
                 - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Left)),
-            -bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Up)),
+            0,
         ));
+
+        if input.is_key_held(sdl2::keyboard::Scancode::Up) {
+            player.jump();
+        }
     }
 }
