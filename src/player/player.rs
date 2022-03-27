@@ -188,6 +188,7 @@ impl Player {
             if self.grounded {
                 self.y = (new_y - bounce_rect.height) as i32;
             }
+            self.grounded = true;
         }
     }
 
