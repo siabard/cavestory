@@ -30,7 +30,8 @@ pub struct Slope {
 
 impl Slope {
     pub fn get_slope(&self) -> f32 {
-        (self.to.1.abs() - self.from.1.abs()) / (self.to.0.abs() - self.from.0.abs())
+        (self.to.top().abs() - self.from.top().abs())
+            / (self.to.left().abs() - self.from.left().abs())
     }
 
     pub fn collides_with(&self, rect: Rectangle) -> bool {

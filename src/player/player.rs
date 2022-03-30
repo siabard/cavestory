@@ -49,11 +49,11 @@ pub struct Player {
 
 impl Player {
     pub fn new(x: i32, y: i32) -> Self {
-        let mut animation = AnimateSprite::new("player".into(), 0, 0, 150);
-        animation.add_animation("idle_left".into(), Rect::new(0, 0, 16, 16), 1, 1);
-        animation.add_animation("idle_right".into(), Rect::new(0, 16, 16, 16), 1, 1);
-        animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 3, 1);
-        animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 3, 1);
+        let mut animation = AnimateSprite::new("player".into());
+        animation.add_animation("idle_left".into(), Rect::new(0, 0, 16, 16), 150, 1, 1);
+        animation.add_animation("idle_right".into(), Rect::new(0, 16, 16, 16), 150, 1, 1);
+        animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 150, 3, 1);
+        animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 150, 3, 1);
         animation.set_animation("move_left".into());
         Self {
             animation,
@@ -153,8 +153,8 @@ impl Player {
                         self.dx = 0.;
                         self.x = ((self.x as f32)
                             - match self.facing {
-                                Direction::Right => 0.5,
-                                _ => -0.5,
+                                Direction::Right => 1.0,
+                                _ => -1.0,
                             }) as i32;
                     }
                 }
@@ -179,11 +179,11 @@ impl Player {
     }
 
     pub fn handle_slope_collision(&mut self, slopes: &[Slope]) {
+        let bounce_rect: Rectangle = self.collision.into();
+        let center_x = bounce_rect.center_x();
+
         for slope in slopes {
             let b = slope.from.top() - slope.get_slope() * slope.from.left().abs();
-            let bounce_rect: Rectangle = self.collision.into();
-            let center_x = bounce_rect.center_x();
-
             let new_y = slope.get_slope() * center_x + b - 4.0;
             if self.grounded {
                 self.y = (new_y - bounce_rect.height) as i32;

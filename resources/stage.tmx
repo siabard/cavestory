@@ -61,11 +61,11 @@
 </data>
  </layer>
  <objectgroup id="4" name="slope">
-  <object id="1" x="207.636" y="192">
-   <polyline points="0,0 22.5455,-21.0909"/>
+  <object id="1" x="207.823" y="192.125">
+   <polyline points="0,0 16.358,-16.3409"/>
   </object>
-  <object id="2" x="160.545" y="208.545">
-   <polyline points="0,0 19.0909,-14.1819"/>
+  <object id="2" x="159.795" y="207.982">
+   <polyline points="0,0 16.3239,-15.983"/>
   </object>
  </objectgroup>
 </map>
