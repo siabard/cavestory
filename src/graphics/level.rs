@@ -58,7 +58,6 @@ impl Slope {
 /// 지도에는 map용 파일과
 /// 각 map 블럭에 대한 정보를 넣는다.
 pub struct Level<'a> {
-    map_id: String,
     pub x: i32,     //  x
     pub y: i32,     //  y
     pub cam_x: i32, // camera_x
@@ -79,7 +78,6 @@ pub struct Level<'a> {
 
 impl<'a> Level<'a> {
     pub fn new(
-        level_id: String,
         texture_creator: &'a TextureCreator<WindowContext>,
         path: &'static str,
     ) -> Level<'a> {
@@ -151,18 +149,19 @@ impl<'a> Level<'a> {
             let objects = &object_group.objects;
             for object in objects {
                 if let tiled::ObjectShape::Polyline { points } = &object.shape {
-                    let mut from = Vector2(object.x + points[0].0, object.y + points[0].1);
-                    for i in 1..points.len() {
-                        let to = Vector2(object.x + points[i].0, object.y + points[i].1);
+                    let mut from =
+                        Vector2((object.x + points[0].0).ceil(), (object.y + points[0].1).ceil());
+
+                    points.iter().skip(1).for_each(|&point| {
+                        let to = Vector2((object.x + point.0).ceil(), (object.y + point.1).ceil());
                         slopes.push(Slope { from, to });
                         from = to;
-                    }
+                    });
                 }
             }
         }
 
         Level {
-            map_id: level_id,
             x: 0,
             y: 0,
             cam_x: 0,

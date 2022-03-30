@@ -50,10 +50,10 @@ pub struct Player {
 impl Player {
     pub fn new(x: i32, y: i32) -> Self {
         let mut animation = AnimateSprite::new("player".into());
-        animation.add_animation("idle_left".into(), Rect::new(0, 0, 16, 16), 150, 1, 1);
-        animation.add_animation("idle_right".into(), Rect::new(0, 16, 16, 16), 150, 1, 1);
-        animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 150, 3, 1);
-        animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 150, 3, 1);
+        animation.add_animation("idle_left".into(), Rect::new(0, 0, 16, 16), 150, false, 1, 1);
+        animation.add_animation("idle_right".into(), Rect::new(0, 16, 16, 16), 150, false, 1, 1);
+        animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 150, false, 3, 1);
+        animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 150, false, 3, 1);
         animation.set_animation("move_left".into());
         Self {
             animation,

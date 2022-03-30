@@ -6,13 +6,13 @@ use sdl2::{
     video::WindowContext,
 };
 
+use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
 use crate::{
     graphics::{level::Level, Graphics},
     input::Input,
     player::Player,
 };
-
-use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
+use std::collections::HashMap;
 
 fn bool_to_sign(b: bool) -> i32 {
     if b {
@@ -25,13 +25,13 @@ fn bool_to_sign(b: bool) -> i32 {
 #[derive(Default)]
 pub struct Game<'a> {
     pub player: Option<Player>,
-    pub level: Option<Level<'a>>,
+    pub level: HashMap<String, Level<'a>>,
     pub graphics: Graphics<'a>,
 }
 
 impl<'a> Game<'a> {
     pub fn new() -> Game<'a> {
-        Game { player: None, level: None, graphics: Graphics::new() }
+        Game { player: None, level: HashMap::new(), graphics: Graphics::new() }
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a TextureCreator<WindowContext>) {
@@ -43,12 +43,12 @@ impl<'a> Game<'a> {
             Path::new("resources/mychar.png"),
         );
 
-        let map = Level::new("map".into(), texture_creator, "stage.tmx");
-        self.level = Some(map);
+        let map = Level::new(texture_creator, "stage.tmx");
+        self.level.insert("map".into(), map);
     }
 
     pub fn render(&self, canvas: &mut WindowCanvas) {
-        if let Some(map) = &self.level {
+        if let Some(map) = self.level.get("map") {
             map.render(
                 canvas,
                 &Rect::new(
@@ -69,7 +69,7 @@ impl<'a> Game<'a> {
         if let Some(player) = self.player.as_mut() {
             player.update(dt);
 
-            if let Some(level) = &self.level {
+            if let Some(level) = self.level.get("map") {
                 // collision
                 let collided_blocks = level.collided_blocks(&player.collision);
                 if !collided_blocks.is_empty() {
