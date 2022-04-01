@@ -11,9 +11,9 @@ use crate::physics::collides_with;
 use sdl2::video::WindowContext;
 use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
-use tiled::parse_file;
+use tiled::{parse_file, Frame};
 
-use super::{Rectangle, Vector2};
+use super::{AnimatedTile, Rectangle, Vector2};
 
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
@@ -74,6 +74,7 @@ pub struct Level<'a> {
     pub blocks: Vec<Rect>,
     pub slopes: Vec<Slope>,
     pub gids: HashMap<u32, usize>,
+    pub animations: HashMap<u32, AnimatedTile>,
 }
 
 impl<'a> Level<'a> {
@@ -96,6 +97,8 @@ impl<'a> Level<'a> {
 
         let mut gids = HashMap::new();
         gids.insert(0, 0);
+
+        let mut animations = HashMap::new();
 
         for (i, tileset) in tile_sets.iter().enumerate() {
             let tile_width = tileset.tile_width;
@@ -120,6 +123,32 @@ impl<'a> Level<'a> {
             tile_atlases.insert(i, tile_atlas);
             tile_widths.insert(i, tileset.tile_width);
             tile_heights.insert(i, tileset.tile_height);
+
+            // tileset에 <tile /> 태그가 붙는 경우 animation등 있을 수 있다.
+            // animation은 animaions에 넣는다.
+
+            if !tileset.tiles.is_empty() {
+                for tile in &tileset.tiles {
+                    if let Some(animation) = &tile.animation {
+                        let animation: Vec<Frame> = animation
+                            .iter()
+                            .map(|frame| Frame {
+                                tile_id: tileset.first_gid + frame.tile_id,
+                                duration: frame.duration,
+                            })
+                            .collect();
+                        animations.insert(
+                            tile.id + tileset.first_gid,
+                            AnimatedTile::new(
+                                Rect::new(0, 0, tileset.tile_width, tileset.tile_height),
+                                animation,
+                                0,
+                                0,
+                            ),
+                        );
+                    }
+                }
+            }
         }
 
         // layer의 이름이 collision인 경우에는 해당하는 값의 좌표를 blocks에 넣는다.
@@ -145,6 +174,7 @@ impl<'a> Level<'a> {
             }
         }
 
+        // object 그룹은 slope에 해당하는 점들을 등록한다.
         for (_, object_group) in object_group.iter().enumerate() {
             let objects = &object_group.objects;
             for object in objects {
@@ -178,6 +208,7 @@ impl<'a> Level<'a> {
             blocks,
             gids,
             slopes,
+            animations,
         }
     }
 

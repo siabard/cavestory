@@ -1,4 +1,5 @@
 pub mod animate_sprite;
+pub mod animated_tile;
 pub mod animation;
 pub mod graphics;
 pub mod level;
@@ -7,6 +8,7 @@ pub mod texture_manager;
 pub mod tile;
 
 pub use animate_sprite::*;
+pub use animated_tile::*;
 pub use animation::*;
 pub use graphics::*;
 use sdl2::{
