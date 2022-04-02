@@ -69,7 +69,7 @@ impl<'a> Game<'a> {
         if let Some(player) = self.player.as_mut() {
             player.update(dt);
 
-            if let Some(level) = self.level.get("map") {
+            if let Some(level) = self.level.get_mut("map") {
                 // collision
                 let collided_blocks = level.collided_blocks(&player.collision);
                 if !collided_blocks.is_empty() {
@@ -81,6 +81,8 @@ impl<'a> Game<'a> {
                 if !collided_slopes.is_empty() {
                     player.handle_slope_collision(&collided_slopes);
                 }
+
+                level.update(dt);
             }
         }
     }

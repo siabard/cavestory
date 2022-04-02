@@ -238,6 +238,12 @@ impl<'a> Level<'a> {
         ((tile_x * self.tile_width) as f64, (tile_y * self.tile_height) as f64)
     }
 
+    pub fn update(&mut self, dt: u32) {
+        for (_key, value) in &mut self.animations {
+            value.update(dt);
+        }
+    }
+
     pub fn render(&self, canvas: &mut WindowCanvas, camera_rect: &Rect) {
         for (i, layer) in self.layers.iter().enumerate() {
             if layer.name != "collision" {
@@ -262,6 +268,7 @@ impl<'a> Level<'a> {
                     for y in tile_top..tile_bottom {
                         for x in tile_left..tile_right {
                             let gid = tiles[y as usize][x as usize].gid;
+
                             if gid != 0 {
                                 // gid 로 부터 tile_atlases의 index를 구함
                                 // tile_atlases의 모든 first_gid 중 gid 값보다 큰 것 중에 가장 작은 인덱스를 구할 것
@@ -273,8 +280,17 @@ impl<'a> Level<'a> {
                                 // Vec<(texture_idx: usize, x, y, w, h)> 이면 됨..
                                 let idx_gid = self.gids.get(&gid).unwrap();
 
-                                let rect =
-                                    self.tile_atlases.get(idx_gid).unwrap().get_tile_rect(gid);
+                                let tile_atlas = self.tile_atlases.get(idx_gid).unwrap();
+
+                                let rect = if layer.name == "animation" {
+                                    let animation = self
+                                        .animations
+                                        .get(&tiles[y as usize][x as usize].gid)
+                                        .unwrap();
+                                    tile_atlas.get_tile_rect(animation.get_current_frame())
+                                } else {
+                                    tile_atlas.get_tile_rect(gid)
+                                };
 
                                 let dest = Rect::new(
                                     (((x - tile_left) as i32 * tile_width as i32 - tile_start_x)

@@ -16,6 +16,7 @@ impl AnimatedTile {
     pub fn new(position: Rect, animation: Vec<Frame>, index: usize, duration: i32) -> Self {
         AnimatedTile { position, animation, index, duration }
     }
+
     pub fn update(&mut self, dt: u32) {
         if self.duration <= 0 {
             if self.index == self.animation.len() - 1 {
@@ -29,5 +30,7 @@ impl AnimatedTile {
         }
     }
 
-    pub fn render(&self, canvas: &mut WindowCanvas, texture: &Texture) {}
+    pub fn get_current_frame(&self) -> u32 {
+        self.animation[self.index].tile_id
+    }
 }
