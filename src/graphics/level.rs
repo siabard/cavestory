@@ -5,7 +5,6 @@ use std::collections::HashMap;
 
 use crate::constant::*;
 use crate::game::SPRITE_SCALE;
-/// Tiled를 읽어서 맵을 채운다.
 use crate::graphics::tile;
 use crate::physics::collides_with;
 use sdl2::video::WindowContext;
