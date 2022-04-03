@@ -124,8 +124,8 @@ impl<'a> Level<'a> {
             tile_widths.insert(i, tileset.tile_width);
             tile_heights.insert(i, tileset.tile_height);
 
-            // tileset에 <tile /> 태그가 붙는 경우 animation등 있을 수 있다.
-            // animation은 animaions에 넣는다.
+            // tileset에 <tile /> 태그가 붙는 경우 <frame /> 태그를 통한 애니메이션이 설정된다.
+            // 각각의 Animation에 대한 (gid로 대표) Frame정보는 animaions에 넣는다.
 
             if !tileset.tiles.is_empty() {
                 for tile in &tileset.tiles {
@@ -151,7 +151,7 @@ impl<'a> Level<'a> {
             }
         }
 
-        // layer의 이름이 collision인 경우에는 해당하는 값의 좌표를 blocks에 넣는다.
+        // layer의 이름이 collision인 일반 Tile의 경우에는 해당하는 값의 좌표를 blocks에 넣는다.
         let mut blocks = vec![];
 
         for (_, layer) in layers.iter().enumerate() {
@@ -239,9 +239,9 @@ impl<'a> Level<'a> {
     }
 
     pub fn update(&mut self, dt: u32) {
-        for (_key, value) in &mut self.animations {
-            value.update(dt);
-        }
+        self.animations.values_mut().for_each(|v| {
+            v.update(dt);
+        });
     }
 
     pub fn render(&self, canvas: &mut WindowCanvas, camera_rect: &Rect) {
