@@ -1,20 +1,15 @@
-use sdl2::{
-    rect::Rect,
-    render::{Texture, WindowCanvas},
-};
 use tiled::Frame;
 
 #[derive(Debug, Clone)]
 pub struct AnimatedTile {
-    position: Rect,
     animation: Vec<Frame>,
     index: usize,
     duration: i32,
 }
 
 impl AnimatedTile {
-    pub fn new(position: Rect, animation: Vec<Frame>, index: usize, duration: i32) -> Self {
-        AnimatedTile { position, animation, index, duration }
+    pub fn new(animation: Vec<Frame>, index: usize, duration: i32) -> Self {
+        AnimatedTile { animation, index, duration }
     }
 
     pub fn update(&mut self, dt: u32) {

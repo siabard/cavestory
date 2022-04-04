@@ -138,12 +138,7 @@ impl<'a> Level<'a> {
                             .collect();
                         animations.insert(
                             tile.id + tileset.first_gid,
-                            AnimatedTile::new(
-                                Rect::new(0, 0, tileset.tile_width, tileset.tile_height),
-                                animation,
-                                0,
-                                0,
-                            ),
+                            AnimatedTile::new(animation, 0, 0),
                         );
                     }
                 }
