@@ -90,13 +90,30 @@ impl<'a> Game<'a> {
     pub fn process_key_event(&mut self, input: &Input) {
         let player = self.player.as_mut().unwrap();
 
-        player.move_vector((
-            bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Right))
-                - bool_to_sign(input.is_key_held(sdl2::keyboard::Scancode::Left)),
-            0,
-        ));
+        if input.is_key_held(sdl2::keyboard::Scancode::Right) {
+            player.move_right();
+        } else if input.is_key_held(sdl2::keyboard::Scancode::Left) {
+            player.move_left();
+        } else if !input.is_key_held(sdl2::keyboard::Scancode::Right)
+            && !input.is_key_held(sdl2::keyboard::Scancode::Left)
+        {
+            player.stop();
+        }
 
         if input.is_key_held(sdl2::keyboard::Scancode::Up) {
+            player.look_up();
+        } else if input.is_key_held(sdl2::keyboard::Scancode::Down) {
+            player.look_down();
+        }
+
+        if input.was_key_release(sdl2::keyboard::Scancode::Up) {
+            player.stop_looking_up();
+        }
+        if input.was_key_release(sdl2::keyboard::Scancode::Down) {
+            player.stop_looking_down();
+        }
+
+        if input.is_key_held(sdl2::keyboard::Scancode::Z) {
             player.jump();
         }
     }

@@ -45,6 +45,8 @@ pub struct Player {
     facing: Direction,
     grounded: bool,
     pub collision: Rect,
+    looking_up: bool,
+    looking_down: bool,
 }
 
 impl Player {
@@ -54,7 +56,59 @@ impl Player {
         animation.add_animation("idle_right".into(), Rect::new(0, 16, 16, 16), 150, false, 1, 1);
         animation.add_animation("move_left".into(), Rect::new(0, 0, 16, 16), 150, false, 3, 1);
         animation.add_animation("move_right".into(), Rect::new(0, 16, 16, 16), 150, false, 3, 1);
+        animation.add_animation("idle_left_up".into(), Rect::new(48, 0, 16, 16), 150, false, 1, 1);
+        animation.add_animation(
+            "idle_right_up".into(),
+            Rect::new(48, 16, 16, 16),
+            150,
+            false,
+            1,
+            1,
+        );
+        animation.add_animation("move_left_up".into(), Rect::new(48, 0, 16, 16), 150, false, 3, 1);
+        animation.add_animation(
+            "move_right_up".into(),
+            Rect::new(48, 16, 16, 16),
+            150,
+            false,
+            3,
+            1,
+        );
+        animation.add_animation(
+            "look_down_left".into(),
+            Rect::new(96, 0, 16, 16),
+            150,
+            false,
+            1,
+            1,
+        );
+        animation.add_animation(
+            "look_down_right".into(),
+            Rect::new(96, 16, 16, 16),
+            150,
+            false,
+            1,
+            1,
+        );
+        animation.add_animation(
+            "look_backwards_left".into(),
+            Rect::new(112, 0, 16, 16),
+            150,
+            false,
+            1,
+            1,
+        );
+        animation.add_animation(
+            "look_backwards_right".into(),
+            Rect::new(112, 16, 16, 16),
+            150,
+            false,
+            1,
+            1,
+        );
+
         animation.set_animation("move_left".into());
+
         Self {
             animation,
             x,
@@ -64,6 +118,8 @@ impl Player {
             facing: Direction::IdleLeft,
             grounded: false,
             collision: Rect::new(0, 0, 16, 16),
+            looking_up: false,
+            looking_down: false,
         }
     }
 
@@ -80,65 +136,62 @@ impl Player {
     }
 
     pub fn update(&mut self, dt: u32) {
-        self.animation.update(dt);
         self.x += (self.dx * dt as f32) as i32;
-
         // free fall
         if self.dy <= GRAVITY_CAP {
             self.dy += GRAVITY;
         }
         self.y += (self.dy * dt as f32) as i32;
 
-        self.facing = match self.dy {
-            dy if dy > 0. => Direction::Down,
-            dy if dy < 0. => Direction::Up,
-            dy if dy == 0. => {
-                if self.facing == Direction::Down {
-                    Direction::IdleRight
-                } else if self.facing == Direction::Up {
-                    Direction::IdleLeft
-                } else {
-                    self.facing
-                }
-            }
-            _ => self.facing,
-        };
-
-        self.facing = match self.dx {
-            dx if dx > 0. => Direction::Right,
-            dx if dx < 0. => Direction::Left,
-            dx if dx == 0. => {
-                if self.facing == Direction::Right {
-                    Direction::IdleRight
-                } else if self.facing == Direction::Left {
-                    Direction::IdleLeft
-                } else {
-                    self.facing
-                }
-            }
-            _ => self.facing,
-        };
-
-        match self.facing {
-            Direction::IdleLeft => self.animation.set_animation("idle_left".into()),
-            Direction::IdleRight => self.animation.set_animation("idle_right".into()),
-            Direction::Left => self.animation.set_animation("move_left".into()),
-            Direction::Right => self.animation.set_animation("move_right".into()),
-            Direction::Up => self.animation.set_animation("move_left".into()),
-            Direction::Down => self.animation.set_animation("move_right".into()),
-            _ => self.animation.set_animation("idle_right".into()),
-        }
-
+        self.animation.update(dt);
         self.collision.x = self.x;
         self.collision.y = self.y;
     }
 
+    pub fn move_left(&mut self) {
+        if self.looking_down && self.grounded {
+            return;
+        }
+
+        self.dx = WALK_SPEED * -1.;
+
+        if !self.looking_up {
+            self.animation.set_animation("move_left".into());
+        }
+        self.facing = Direction::Left;
+    }
+
+    pub fn move_right(&mut self) {
+        if self.looking_down && self.grounded {
+            return;
+        }
+
+        self.dx = WALK_SPEED;
+        if !self.looking_up {
+            self.animation.set_animation("move_right".into());
+        }
+
+        self.facing = Direction::Right;
+    }
+
     pub fn move_vector(&mut self, vector: (i32, i32)) {
+        if vector.0 < 0 && self.looking_down && self.grounded {
+            return;
+        }
+
         self.dx = WALK_SPEED * vector.0 as f32;
         // self.dy = WALK_SPEED * vector.1 as f32;
     }
+
     pub fn stop(&mut self) {
         self.dx = 0.0;
+        if !self.looking_up && !self.looking_down {
+            self.animation.set_animation(if self.facing == Direction::Right {
+                "idle_right".into()
+            } else {
+                "idle_left".into()
+            });
+        }
         // self.dy = 0.0;
     }
 
@@ -214,6 +267,48 @@ impl Player {
         } else {
             Sides::None
         }
+    }
+
+    /// The player Lookup
+    pub fn look_up(&mut self) {
+        self.looking_up = true;
+        if self.dx == 0. {
+            self.animation.set_animation(match self.facing {
+                Direction::Right => "idle_right_up".into(),
+                _ => "idle_left_up".into(),
+            });
+        } else {
+            self.animation.set_animation(match self.facing {
+                Direction::Right => "move_right_up".into(),
+                _ => "move_left_up".into(),
+            });
+        }
+    }
+
+    /// The player stops looking up
+    pub fn stop_looking_up(&mut self) {
+        self.looking_up = false;
+    }
+
+    /// The player looks down OR interacts (turns around)
+    pub fn look_down(&mut self) {
+        self.looking_up = true;
+        if self.grounded {
+            self.animation.set_animation(match self.facing {
+                Direction::Right => "look_backwards_right".into(),
+                _ => "look_backwards_left".into(),
+            });
+        } else {
+            self.animation.set_animation(match self.facing {
+                Direction::Right => "look_down_right".into(),
+                _ => "look_down_left".into(),
+            });
+        }
+    }
+
+    /// The plyaer stops looking down or interacting
+    pub fn stop_looking_down(&mut self) {
+        self.looking_down = false;
     }
 }
 
