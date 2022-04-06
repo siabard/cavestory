@@ -47,6 +47,8 @@ pub struct Player {
     pub collision: Rect,
     looking_up: bool,
     looking_down: bool,
+    pub max_health: i32,
+    pub current_health: i32,
 }
 
 impl Player {
@@ -120,6 +122,8 @@ impl Player {
             collision: Rect::new(0, 0, 16, 16),
             looking_up: false,
             looking_down: false,
+            max_health: 100,
+            current_health: 100,
         }
     }
 

@@ -5,6 +5,7 @@ use sdl2::{
 
 use crate::game::SPRITE_SCALE;
 
+#[derive(Debug, Clone)]
 pub struct Sprite {
     pub name: String,
     pub source_rect: Rect,

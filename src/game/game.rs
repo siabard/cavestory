@@ -8,7 +8,7 @@ use sdl2::{
 
 use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
 use crate::{
-    graphics::{level::Level, Graphics},
+    graphics::{level::Level, Graphics, Hud},
     input::Input,
     player::Player,
 };
@@ -27,20 +27,30 @@ pub struct Game<'a> {
     pub player: Option<Player>,
     pub level: HashMap<String, Level<'a>>,
     pub graphics: Graphics<'a>,
+    pub hud: Option<Hud>,
 }
 
 impl<'a> Game<'a> {
     pub fn new() -> Game<'a> {
-        Game { player: None, level: HashMap::new(), graphics: Graphics::new() }
+        Game { player: None, level: HashMap::new(), graphics: Graphics::new(), hud: None }
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a TextureCreator<WindowContext>) {
         let player = Player::new(100, 100);
         self.player = Some(player);
+
+        let hud = Hud::new();
+        self.hud = Some(hud);
+
         self.graphics.load_image(
             texture_creator,
             "player".into(),
             Path::new("resources/mychar.png"),
+        );
+        self.graphics.load_image(
+            texture_creator,
+            "textbox".into(),
+            Path::new("resources/text_box.png"),
         );
 
         let map = Level::new(texture_creator, "stage.tmx");
@@ -62,12 +72,18 @@ impl<'a> Game<'a> {
 
         if let Some(player) = &self.player {
             self.graphics.render_sprite(canvas, player);
+            if let Some(hud) = &self.hud {
+                self.graphics.render_sprite(canvas, hud);
+            }
         }
     }
 
     pub fn update(&mut self, dt: u32) {
         if let Some(player) = self.player.as_mut() {
             player.update(dt);
+            if let Some(hud) = self.hud.as_mut() {
+                hud.update(player);
+            }
 
             if let Some(level) = self.level.get_mut("map") {
                 // collision

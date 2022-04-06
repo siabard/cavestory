@@ -2,6 +2,7 @@ pub mod animate_sprite;
 pub mod animated_tile;
 pub mod animation;
 pub mod graphics;
+pub mod hud;
 pub mod level;
 pub mod sprite;
 pub mod texture_manager;
@@ -11,6 +12,8 @@ pub use animate_sprite::*;
 pub use animated_tile::*;
 pub use animation::*;
 pub use graphics::*;
+pub use hud::*;
+
 use sdl2::{
     rect::Rect,
     render::{Texture, WindowCanvas},
