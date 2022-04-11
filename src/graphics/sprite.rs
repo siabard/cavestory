@@ -33,4 +33,8 @@ impl Sprite {
             .copy_ex(texture, Some(self.source_rect), Some(dest), 0.0, None, false, false)
             .unwrap();
     }
+
+    pub fn set_source_rect(&mut self, rect: Rect) {
+        self.source_rect = rect;
+    }
 }

@@ -122,8 +122,8 @@ impl Player {
             collision: Rect::new(0, 0, 16, 16),
             looking_up: false,
             looking_down: false,
-            max_health: 100,
-            current_health: 100,
+            max_health: 3,
+            current_health: 2,
         }
     }
 
