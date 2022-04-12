@@ -10,7 +10,9 @@ use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
 use crate::{
     graphics::{level::Level, Graphics, Hud},
     input::Input,
+    physics::Sided,
     player::Player,
+    GameResult,
 };
 use std::collections::HashMap;
 
@@ -36,25 +38,7 @@ impl<'a> Game<'a> {
     }
 
     pub fn init_sprite(&mut self, texture_creator: &'a TextureCreator<WindowContext>) {
-        let player = Player::new(100, 100);
-        self.player = Some(player);
-
-        let hud = Hud::new();
-        self.hud = Some(hud);
-
-        self.graphics.load_image(
-            texture_creator,
-            "player".into(),
-            Path::new("resources/mychar.png"),
-        );
-        self.graphics.load_image(
-            texture_creator,
-            "textbox".into(),
-            Path::new("resources/text_box.png"),
-        );
-
-        let map = Level::new(texture_creator, "stage.tmx");
-        self.level.insert("map".into(), map);
+        self.change_map("stage.tmx".into(), texture_creator);
     }
 
     pub fn render(&self, canvas: &mut WindowCanvas) {
@@ -78,7 +62,7 @@ impl<'a> Game<'a> {
         }
     }
 
-    pub fn update(&mut self, dt: u32) {
+    pub fn update(&mut self, dt: u32) -> GameResult {
         if let Some(player) = self.player.as_mut() {
             player.update(dt);
             if let Some(hud) = self.hud.as_mut() {
@@ -98,9 +82,49 @@ impl<'a> Game<'a> {
                     player.handle_slope_collision(&collided_slopes);
                 }
 
+                // door
+                let collided_doors = level.collided_doors(&player.collision);
+                if !collided_doors.is_empty() {
+                    let level = player.handle_door_collision(&collided_doors);
+
+                    if !level.is_empty() {
+                        return GameResult::GotoMap(level);
+                    }
+                }
+
                 level.update(dt);
             }
         }
+
+        GameResult::None
+    }
+
+    pub fn change_map(
+        &mut self,
+        map_name: String,
+        texture_creator: &'a TextureCreator<WindowContext>,
+    ) {
+        let map = Level::new(texture_creator, map_name);
+        let player_pos = (map.start_pos.left() as i32, map.start_pos.top() as i32);
+
+        self.level.insert("map".into(), map);
+
+        let player = Player::new(player_pos.0, player_pos.1);
+        self.player = Some(player);
+
+        let hud = Hud::new();
+        self.hud = Some(hud);
+
+        self.graphics.load_image(
+            texture_creator,
+            "player".into(),
+            Path::new("resources/mychar.png"),
+        );
+        self.graphics.load_image(
+            texture_creator,
+            "textbox".into(),
+            Path::new("resources/text_box.png"),
+        );
     }
 
     pub fn process_key_event(&mut self, input: &Input) {

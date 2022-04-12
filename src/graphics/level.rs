@@ -10,9 +10,9 @@ use crate::physics::collides_with;
 use sdl2::video::WindowContext;
 use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
-use tiled::{parse_file, Frame};
+use tiled::{parse_file, Frame, PropertyValue};
 
-use super::{AnimatedTile, Rectangle, Vector2};
+use super::{AnimatedTile, Door, Rectangle, Vector2};
 
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
@@ -74,15 +74,14 @@ pub struct Level<'a> {
     pub slopes: Vec<Slope>,
     pub gids: HashMap<u32, usize>,
     pub animations: HashMap<u32, AnimatedTile>,
+    pub start_pos: Vector2,
+    pub doors: Vec<Door>,
 }
 
 impl<'a> Level<'a> {
-    pub fn new(
-        texture_creator: &'a TextureCreator<WindowContext>,
-        path: &'static str,
-    ) -> Level<'a> {
+    pub fn new(texture_creator: &'a TextureCreator<WindowContext>, path: String) -> Level<'a> {
         // read tmx file
-        let map: tiled::Map = parse_file(Path::new(&(ASSET_DIR.to_owned() + path))).unwrap();
+        let map: tiled::Map = parse_file(Path::new(&(ASSET_DIR.to_owned() + &path))).unwrap();
 
         let layers: Vec<tiled::Layer> = map.layers;
         let object_group: Vec<tiled::ObjectGroup> = map.object_groups;
@@ -98,6 +97,9 @@ impl<'a> Level<'a> {
         gids.insert(0, 0);
 
         let mut animations = HashMap::new();
+
+        let mut start_pos: Vector2 = Vector2(0., 0.);
+        let mut doors: Vec<Door> = vec![];
 
         for (i, tileset) in tile_sets.iter().enumerate() {
             let tile_width = tileset.tile_width;
@@ -170,17 +172,44 @@ impl<'a> Level<'a> {
 
         // object 그룹은 slope에 해당하는 점들을 등록한다.
         for (_, object_group) in object_group.iter().enumerate() {
-            let objects = &object_group.objects;
-            for object in objects {
-                if let tiled::ObjectShape::Polyline { points } = &object.shape {
-                    let mut from =
-                        Vector2((object.x + points[0].0).ceil(), (object.y + points[0].1).ceil());
+            if object_group.name == "slope" {
+                let objects = &object_group.objects;
+                for object in objects {
+                    if let tiled::ObjectShape::Polyline { points } = &object.shape {
+                        let mut from = Vector2(
+                            (object.x + points[0].0).ceil(),
+                            (object.y + points[0].1).ceil(),
+                        );
 
-                    points.iter().skip(1).for_each(|&point| {
-                        let to = Vector2((object.x + point.0).ceil(), (object.y + point.1).ceil());
-                        slopes.push(Slope { from, to });
-                        from = to;
-                    });
+                        points.iter().skip(1).for_each(|&point| {
+                            let to =
+                                Vector2((object.x + point.0).ceil(), (object.y + point.1).ceil());
+                            slopes.push(Slope { from, to });
+                            from = to;
+                        });
+                    }
+                }
+            } else if object_group.name == "start" {
+                let objects = &object_group.objects;
+                start_pos = Vector2(objects[0].x, objects[0].y);
+            } else if object_group.name == "doors" {
+                let objects = &object_group.objects;
+                for object in objects {
+                    if let Some(PropertyValue::StringValue(s)) =
+                        object.properties.get("destination")
+                    {
+                        doors.push(Door::new(
+                            (*s).clone(),
+                            Rectangle {
+                                left: object.x,
+                                right: object.x + object.width,
+                                top: object.y,
+                                bottom: object.y + object.height,
+                                width: object.width,
+                                height: object.height,
+                            },
+                        ));
+                    }
                 }
             }
         }
@@ -203,6 +232,8 @@ impl<'a> Level<'a> {
             gids,
             slopes,
             animations,
+            start_pos,
+            doors,
         }
     }
 
@@ -326,5 +357,9 @@ impl<'a> Level<'a> {
             .filter(|slope| (*slope).collides_with((*other).into()))
             .copied()
             .collect()
+    }
+
+    pub fn collided_doors(&self, other: &Rect) -> Vec<Door> {
+        self.doors.iter().filter(|door| collides_with(&door.position, other)).cloned().collect()
     }
 }

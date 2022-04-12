@@ -1,6 +1,7 @@
 pub mod animate_sprite;
 pub mod animated_tile;
 pub mod animation;
+pub mod door;
 pub mod graphics;
 pub mod hud;
 pub mod level;
@@ -11,6 +12,7 @@ pub mod tile;
 pub use animate_sprite::*;
 pub use animated_tile::*;
 pub use animation::*;
+pub use door::*;
 pub use graphics::*;
 pub use hud::*;
 
@@ -20,6 +22,8 @@ use sdl2::{
 };
 pub use sprite::*;
 pub use texture_manager::*;
+
+use crate::physics::{Sided, Sides};
 
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Vector2(f32, f32);
@@ -59,6 +63,33 @@ impl From<Rect> for Rectangle {
             bottom: (rect.y + rect.h) as f32,
             width: rect.w as f32,
             height: rect.h as f32,
+        }
+    }
+}
+
+impl From<Rectangle> for Rect {
+    fn from(rectangle: Rectangle) -> Self {
+        Rect::new(
+            rectangle.left as i32,
+            rectangle.top as i32,
+            rectangle.width as u32,
+            rectangle.height as u32,
+        )
+    }
+}
+
+impl Sided for Rectangle {
+    fn get_rect(&self) -> Rect {
+        (*self).into()
+    }
+
+    fn get_side(&self, side: Sides) -> i32 {
+        match side {
+            Sides::Left => self.left as i32,
+            Sides::Right => (self.left + self.width) as i32,
+            Sides::Top => self.top as i32,
+            Sides::Bottom => (self.top + self.height) as i32,
+            Sides::None => 0,
         }
     }
 }

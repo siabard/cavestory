@@ -4,7 +4,7 @@ use sdl2::{
 };
 
 use crate::{
-    graphics::{level::Slope, AnimateSprite, Rectangle, Renderable},
+    graphics::{level::Slope, AnimateSprite, Door, Rectangle, Renderable},
     physics::Sides,
 };
 
@@ -249,6 +249,16 @@ impl Player {
         }
     }
 
+    pub fn handle_door_collision(&mut self, doors: &[Door]) -> String {
+        let mut level: String = "".into();
+        for door in doors {
+            if self.grounded && self.looking_down {
+                level = door.destination.clone();
+            }
+        }
+        level
+    }
+
     fn collision_side(&self, other: &Rect) -> Sides {
         let amt_right = self.x + self.collision.width() as i32 - other.x;
         let amt_left = other.x + other.width() as i32 - self.x;
@@ -296,7 +306,7 @@ impl Player {
 
     /// The player looks down OR interacts (turns around)
     pub fn look_down(&mut self) {
-        self.looking_up = true;
+        self.looking_down = true;
         if self.grounded {
             self.animation.set_animation(match self.facing {
                 Direction::Right => "look_backwards_right".into(),

@@ -1,5 +1,5 @@
-use cavestory::game::*;
 use cavestory::{game::Game, input::Input};
+use cavestory::{game::*, GameResult};
 use sdl2::{event::Event, image::InitFlag, keyboard::Scancode, EventPump, Sdl, VideoSubsystem};
 use std::time::Duration;
 
@@ -57,9 +57,15 @@ fn main() {
 
         game.process_key_event(&input);
 
-        game.update(dt.min(MAX_FRAME_TIME));
+        let game_result = game.update(dt.min(MAX_FRAME_TIME));
         game.render(&mut canvas);
 
+        match game_result {
+            GameResult::None => {}
+            GameResult::GotoMap(map) => {
+                game.change_map(map, &texture_creator);
+            }
+        }
         canvas.present();
 
         last_update_time = current_time;
