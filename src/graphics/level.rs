@@ -7,12 +7,13 @@ use crate::constant::*;
 use crate::game::SPRITE_SCALE;
 use crate::graphics::tile;
 use crate::physics::collides_with;
+use crate::player::{Bat, Enemy, EnemyRenderable};
 use sdl2::video::WindowContext;
 use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
 use tiled::{parse_file, Frame, PropertyValue};
 
-use super::{AnimatedTile, Door, Rectangle, Vector2};
+use super::{graphics, AnimatedTile, Door, Graphics, Rectangle, Renderable, Vector2};
 
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
@@ -76,6 +77,7 @@ pub struct Level<'a> {
     pub animations: HashMap<u32, AnimatedTile>,
     pub start_pos: Vector2,
     pub doors: Vec<Door>,
+    pub enemies: Vec<Box<dyn EnemyRenderable>>,
 }
 
 impl<'a> Level<'a> {
@@ -100,6 +102,7 @@ impl<'a> Level<'a> {
 
         let mut start_pos: Vector2 = Vector2(0., 0.);
         let mut doors: Vec<Door> = vec![];
+        let mut enemies: Vec<Box<dyn EnemyRenderable>> = vec![];
 
         for (i, tileset) in tile_sets.iter().enumerate() {
             let tile_width = tileset.tile_width;
@@ -211,6 +214,31 @@ impl<'a> Level<'a> {
                         ));
                     }
                 }
+            } else if object_group.name == "enemies" {
+                let objects = &object_group.objects;
+                for object in objects {
+                    if object.name == "bat" {
+                        let mut bat = Bat::new(object.x as i32, object.y as i32);
+                        bat.add_animation(
+                            "fly_left".into(),
+                            Rect::new(2, 32, 16, 16),
+                            150,
+                            false,
+                            3,
+                            1,
+                        );
+                        bat.add_animation(
+                            "fly_right".into(),
+                            Rect::new(2, 48, 16, 16),
+                            150,
+                            false,
+                            3,
+                            1,
+                        );
+                        bat.set_animation("fly_left".into());
+                        enemies.push(Box::new(bat));
+                    }
+                }
             }
         }
 
@@ -234,6 +262,7 @@ impl<'a> Level<'a> {
             animations,
             start_pos,
             doors,
+            enemies,
         }
     }
 
@@ -266,6 +295,10 @@ impl<'a> Level<'a> {
     pub fn update(&mut self, dt: u32) {
         self.animations.values_mut().for_each(|v| {
             v.update(dt);
+        });
+
+        self.enemies.iter_mut().for_each(|e| {
+            e.to_enemy_mut().unwrap().update(dt);
         });
     }
 
@@ -344,6 +377,14 @@ impl<'a> Level<'a> {
                     }
                 }
             }
+        }
+    }
+
+    pub fn render_enemies(&self, graphics: &Graphics, canvas: &mut WindowCanvas) {
+        // render enemies
+        for enemy in &self.enemies {
+            let renderable = enemy.to_renderable().unwrap();
+            graphics.render_sprite(canvas, renderable);
         }
     }
 

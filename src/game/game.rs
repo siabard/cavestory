@@ -52,6 +52,7 @@ impl<'a> Game<'a> {
                     (SCREEN_HEIGHT as f32 / SPRITE_SCALE) as u32,
                 ),
             );
+            map.render_enemies(&self.graphics, canvas);
         }
 
         if let Some(player) = &self.player {
@@ -124,6 +125,12 @@ impl<'a> Game<'a> {
             texture_creator,
             "textbox".into(),
             Path::new("resources/text_box.png"),
+        );
+
+        self.graphics.load_image(
+            texture_creator,
+            "enemy".into(),
+            Path::new("resources/npc_cemet.png"),
         );
     }
 
