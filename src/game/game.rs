@@ -93,7 +93,7 @@ impl<'a> Game<'a> {
                     }
                 }
 
-                level.update(dt);
+                level.update(dt, &player);
             }
         }
 

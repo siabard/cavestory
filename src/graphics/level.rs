@@ -7,7 +7,7 @@ use crate::constant::*;
 use crate::game::SPRITE_SCALE;
 use crate::graphics::tile;
 use crate::physics::collides_with;
-use crate::player::{Bat, Enemy, EnemyRenderable};
+use crate::player::{Bat, Enemy, EnemyRenderable, Player};
 use sdl2::video::WindowContext;
 use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
@@ -221,7 +221,7 @@ impl<'a> Level<'a> {
                         let mut bat = Bat::new(object.x as i32, object.y as i32);
                         bat.add_animation(
                             "fly_left".into(),
-                            Rect::new(2, 32, 16, 16),
+                            Rect::new(32, 32, 16, 16),
                             150,
                             false,
                             3,
@@ -229,7 +229,7 @@ impl<'a> Level<'a> {
                         );
                         bat.add_animation(
                             "fly_right".into(),
-                            Rect::new(2, 48, 16, 16),
+                            Rect::new(32, 48, 16, 16),
                             150,
                             false,
                             3,
@@ -292,13 +292,13 @@ impl<'a> Level<'a> {
         ((tile_x * self.tile_width) as f64, (tile_y * self.tile_height) as f64)
     }
 
-    pub fn update(&mut self, dt: u32) {
+    pub fn update(&mut self, dt: u32, player: &Player) {
         self.animations.values_mut().for_each(|v| {
             v.update(dt);
         });
 
         self.enemies.iter_mut().for_each(|e| {
-            e.to_enemy_mut().unwrap().update(dt);
+            e.to_enemy_mut().unwrap().update(dt, player);
         });
     }
 

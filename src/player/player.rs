@@ -38,8 +38,8 @@ pub const JUMP_SPPED: f32 = 0.4;
 
 pub struct Player {
     animation: AnimateSprite,
-    x: i32,
-    y: i32,
+    pub x: i32,
+    pub y: i32,
     dx: f32,
     dy: f32,
     facing: Direction,

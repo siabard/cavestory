@@ -5,10 +5,10 @@ use sdl2::{
 
 use crate::graphics::{AnimateSprite, Renderable};
 
-use super::Direction;
+use super::{Direction, Player};
 
 pub trait Enemy {
-    fn update(&mut self, dt: u32);
+    fn update(&mut self, dt: u32, player: &Player);
     fn set_animation(&mut self, animation: String);
     fn add_animation(
         &mut self,
@@ -32,6 +32,9 @@ pub struct Bat {
     animation: AnimateSprite,
     x: i32,
     y: i32,
+    starting_x: i32,
+    starting_y: i32,
+    should_move_up: bool,
     dx: f32,
     dy: f32,
     facing: Direction,
@@ -49,6 +52,9 @@ impl Bat {
             animation,
             x,
             y,
+            starting_x: x,
+            starting_y: y,
+            should_move_up: false,
             dx: 0.,
             dy: 0.,
             facing: Direction::Idle,
@@ -58,7 +64,22 @@ impl Bat {
 }
 
 impl Enemy for Bat {
-    fn update(&mut self, dt: u32) {
+    fn update(&mut self, dt: u32, player: &Player) {
+        // move bat
+        self.dy = if self.should_move_up { -0.08 } else { 0.08 };
+        self.x = ((self.x as f32) + self.dx * dt as f32) as i32;
+        self.y = ((self.y as f32) + self.dy * dt as f32) as i32;
+
+        if self.y > (self.starting_y + 20) || self.y < (self.starting_y - 20) {
+            self.should_move_up = !self.should_move_up;
+        }
+
+        self.facing = if player.x > self.x { Direction::Right } else { Direction::Left };
+        self.set_animation(if self.facing == Direction::Right {
+            "fly_right".into()
+        } else {
+            "fly_left".into()
+        });
         self.animation.update(dt);
     }
 
@@ -80,7 +101,21 @@ impl Enemy for Bat {
 }
 
 impl Enemy for Box<Bat> {
-    fn update(&mut self, dt: u32) {
+    fn update(&mut self, dt: u32, player: &Player) {
+        // move bat
+        self.dy = if self.should_move_up { -0.08 } else { 0.08 };
+        self.x = ((self.x as f32) + self.dx * dt as f32) as i32;
+        self.y = ((self.y as f32) + self.dy * dt as f32) as i32;
+        if self.y > (self.starting_y + 20) || self.y < (self.starting_y - 20) {
+            self.should_move_up = !self.should_move_up;
+        }
+
+        self.facing = if player.x > self.x { Direction::Right } else { Direction::Left };
+        self.set_animation(if self.facing == Direction::Right {
+            "fly_right".into()
+        } else {
+            "fly_left".into()
+        });
         self.animation.update(dt);
     }
 
