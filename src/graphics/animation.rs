@@ -1,6 +1,6 @@
 use sdl2::rect::Rect;
 
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub struct Animation {
     frames: Vec<Rect>,
     frame_index: usize,

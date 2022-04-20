@@ -403,4 +403,12 @@ impl<'a> Level<'a> {
     pub fn collided_doors(&self, other: &Rect) -> Vec<Door> {
         self.doors.iter().filter(|door| collides_with(&door.position, other)).cloned().collect()
     }
+
+    pub fn collided_enemies(&self, other: &Rect) -> Vec<&Box<dyn EnemyRenderable>> {
+        self.enemies
+            .iter()
+            .filter(|enemy| collides_with(&enemy.get_collision(), other))
+            .map(|enemy| &*enemy)
+            .collect()
+    }
 }

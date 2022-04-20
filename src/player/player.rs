@@ -324,6 +324,10 @@ impl Player {
     pub fn stop_looking_down(&mut self) {
         self.looking_down = false;
     }
+
+    pub fn take_damage(&mut self, amount: i32) {
+        self.current_health = 0.max(self.current_health - amount);
+    }
 }
 
 impl Renderable for Player {

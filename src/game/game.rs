@@ -93,7 +93,13 @@ impl<'a> Game<'a> {
                     }
                 }
 
-                level.update(dt, &player);
+                // collision enemies
+                let enemies = level.collided_enemies(&player.collision);
+                if !enemies.is_empty() {
+                    player.take_damage(1);
+                }
+
+                level.update(dt, player);
             }
         }
 

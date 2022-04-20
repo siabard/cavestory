@@ -3,7 +3,7 @@ use crate::graphics::animation::Animation;
 use sdl2::{rect::Rect, render::Texture, render::WindowCanvas};
 use std::collections::HashMap;
 
-#[derive(Default)]
+#[derive(Clone, Default)]
 pub struct AnimateSprite {
     pub name: String,
     pub sprites: HashMap<String, Animation>,

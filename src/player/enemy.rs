@@ -19,6 +19,7 @@ pub trait Enemy {
         horizontal: usize,
         vertical: usize,
     );
+    fn get_collision(&self) -> Rect;
 }
 
 pub trait EnemyRenderable: Enemy + Renderable {
@@ -27,6 +28,7 @@ pub trait EnemyRenderable: Enemy + Renderable {
     fn to_enemy_mut(&mut self) -> Option<&mut dyn Enemy>;
 }
 
+#[derive(Clone)]
 pub struct Bat {
     id: uuid::Uuid,
     animation: AnimateSprite,
@@ -98,6 +100,10 @@ impl Enemy for Bat {
     ) {
         self.animation.add_animation(name, rect, duration, play_once, horizontal, vertical);
     }
+
+    fn get_collision(&self) -> Rect {
+        Rect::new(self.x, self.y, self.collision.width(), self.collision.height())
+    }
 }
 
 impl Enemy for Box<Bat> {
@@ -133,6 +139,10 @@ impl Enemy for Box<Bat> {
         vertical: usize,
     ) {
         self.animation.add_animation(name, rect, duration, play_once, horizontal, vertical);
+    }
+
+    fn get_collision(&self) -> Rect {
+        Rect::new(self.x, self.y, self.collision.width(), self.collision.height())
     }
 }
 
