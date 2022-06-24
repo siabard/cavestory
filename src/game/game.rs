@@ -10,7 +10,6 @@ use super::{SCREEN_HEIGHT, SCREEN_WIDTH, SPRITE_SCALE};
 use crate::{
     graphics::{level::Level, Graphics, Hud},
     input::Input,
-    physics::Sided,
     player::Player,
     GameResult,
 };

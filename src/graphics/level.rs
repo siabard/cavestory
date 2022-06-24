@@ -13,7 +13,7 @@ use sdl2::{image::LoadTexture, render::Texture, render::TextureCreator};
 use std::path::Path;
 use tiled::{parse_file, Frame, PropertyValue};
 
-use super::{graphics, AnimatedTile, Door, Graphics, Rectangle, Renderable, Vector2};
+use super::{AnimatedTile, Door, Graphics, Rectangle, Vector2};
 
 /// 맵의 가로 타일 수
 pub const MAP_WIDTH: i32 = 20;
